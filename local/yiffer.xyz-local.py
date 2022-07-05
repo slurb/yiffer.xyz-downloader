@@ -5,7 +5,7 @@ import shutil
 yiffLink = 'https://yiffer.xyz/Rainbow%20Dash'            ################################
 comicName = yiffLink.split("/")[-1]                       #                              #
 staticYiffLink = "https://static.yiffer.xyz/comics"       # edit these lines as seen fit #
-path = "download/"                                        #                              #
+path = "comic folder/"                                    #                              #
                                                           ################################
 
 
