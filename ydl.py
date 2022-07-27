@@ -34,6 +34,7 @@ def Main():
         with open(".Settings.yaml", "r") as Reader:
             Process = yaml.safe_load(Reader)
             Default_Loop_Value = Process["Settings"]["Script_Override"]["Default_Loop_Value"]
+            File_Extension = Process["Settings"]["Script_Override"]["File_Extension"]
             Site_Protocol = Process["Settings"]["Script_Override"]["Site_Protocol"]
             Script_Password = Process["Settings"]["Script_Override"]["Script_Password"]
             Static_Yiff_Link = Process["Settings"]["Website_Data"]["Static_Yiff_Link"]
@@ -42,6 +43,7 @@ def Main():
             Proxies = Process["Settings"]["Fake_Credentials"]["Proxies"]
             User_Agent = Process["Settings"]["Fake_Credentials"]["User_Agents"]
 
+        # Password wall
         if Script_Password == "":
             pass
         else:
@@ -50,7 +52,7 @@ def Main():
                 Prompt = input("Enter Your Script Password:\n >>> ")
                 if Prompt == Script_Password:
                     Clear_Terminal()
-                    Downloader()
+                    pass
                 else:
                     print("\nSorry Wrong Password. Please Try Again.")
                     time.sleep(3)
@@ -74,86 +76,89 @@ def Main():
             Clear_Terminal()
             Comic_Link = input("Enter Your Yiffer.XYZ Porn Link:\n >>> ")
             Clear_Terminal()
-            print("\nProcessing...\n")
+            print("\nProcessing...")
             Comic_Download_Link = f'{Static_Yiff_Link}{Comic_Link.split("/")[-1]}/'
             Comic_Name = Comic_Link.split("/")[-1].replace('%20', " ")
+
             try:
-                if os.name == "posix":
-                    Directory_Name = Comic_Name
-                    Parent_Dir = os.path.dirname(os.path.abspath(__file__)) + '/Comic Folder/'
-                    Yiff_Path = Parent_Dir + Directory_Name
-                    try:
-                        os.mkdir(os.path.join(Parent_Dir, Directory_Name))
-                    except FileExistsError:
-                        Permission = input(f'It Seems You Download This Before... Do You Want To Overwrite/Remove The Existing File Named "{Comic_Name}"? Y/N\n >>> ')
-                        if Permission == "y":
-                            Clear_Terminal()
-                            if os.name == "posix":
-                                os.system(f'rm -rf "{Yiff_Path}"')
-                            else:
-                                os.system(f'rmdir /q/s "{Yiff_Path}"')
-                            os.mkdir(os.path.join(Parent_Dir, Directory_Name))
-                            print("\nProcessing...\n")
-                            pass
-                        elif Permission == "n":
-                            print("Exiting...")
-                            exit()
-                        else:
-                            print(f'{Permission} Not Found, Please Try Again.\n\nExiting...')
-                            time.sleep(10)
-                            exit()
-                    for Loop in range(1, int(Default_Loop_Value)):
-                        File_Name = '{0:0>3}'.format(Loop) + '.jpg'
-                        Image_Handler = requests.get(url=Comic_Download_Link + '{0:0>3}'.format(Loop) + ".jpg", data=random.choice(User_Agent), proxies={f'{Site_Protocol}': f'{Site_Protocol}://{random.choice(Proxies)}'}, timeout=Timeout, stream=True)
-                        if Image_Handler.status_code == 503 or Image_Handler.status_code == 520:
-                            print("Finished Downloading ;)")
-                            time.sleep(10)
-                            exit()
-                        print(f'Downloading: {"{0:0>3}".format(Loop)}.jpg || Comic Name: {Comic_Name} || Scrapping At: {Comic_Download_Link + "{0:0>3}".format(Loop) + ".jpg"}')
-                        with open(File_Name, "wb") as Initial_Writer:
-                            Initial_Writer.write(Image_Handler.content)
-                            Yiff_Path_2 = os.path.dirname(os.path.abspath(__file__)) + "/" + File_Name
-                            Initial_Writer.close()
-                        shutil.move(Yiff_Path_2, Yiff_Path)
+                # Validates the file name by pinging the website
+                print("Validating...")
+                if requests.get(url=Comic_Link, data=random.choice(User_Agent), proxies={f'{Site_Protocol}': f'{Site_Protocol}://{random.choice(Proxies)}'}, timeout=Timeout).status_code == 200:
+                    pass
                 else:
-                    Directory_Name = Comic_Name
-                    Parent_Dir = os.path.dirname(os.path.abspath(__file__)) + '\\Comic Folder\\'
-                    Yiff_Path = Parent_Dir + Directory_Name
-                    try:
-                        os.mkdir(os.path.join(Parent_Dir, Directory_Name))
-                    except FileExistsError:
-                        Permission = input(f'It Seems You Download This Before... Do You Want To Overwrite/Remove The Existing File Named "{Comic_Name}"? Y/N\n >>> ')
-                        if Permission == "y":
-                            Clear_Terminal()
-                            if os.name == "posix":
-                                os.system(f'rm -rf "{Yiff_Path}"')
-                            else:
-                                os.system(f'rmdir /q/s "{Yiff_Path}"')
-                            os.mkdir(os.path.join(Parent_Dir, Directory_Name))
-                            print("\nProcessing...\n")
-                            pass
-                        elif Permission == "n":
-                            print("Exiting...")
-                            exit()
+                    print(f'Comic Named "{Comic_Link}" Is Not Found On "Yiffer.xyz". Please check your link and try again.')
+                    time.sleep(10)
+                    exit()
+
+                # Path sign to support multiple device and os
+                if os.name == "posix":
+                    Absolute_Path_Sign = "/"
+                else:
+                    Absolute_Path_Sign = "\\"
+
+                # Configs
+                Directory_Name = Comic_Name
+                Parent_Dir = os.path.dirname(os.path.abspath(__file__)) + Absolute_Path_Sign + 'Comic Folder' + Absolute_Path_Sign
+                Yiff_Path = Parent_Dir + Directory_Name
+
+                # Checks if the file for "Comic Name" exist
+                # If not exist... it will create a directory then proceed to the main process/downloader thingy
+                try:
+                    os.mkdir(os.path.join(Parent_Dir, Directory_Name))
+                # If not then it will prompt the user and do something based on the user preference
+                except FileExistsError:
+                    Clear_Terminal()
+
+                    # Prompts to tell the user that the file they are downloading exists
+                    Permission = input(f'It Seems You Download This Before... Do You Want To Overwrite/Remove The Existing File Named "{Comic_Name}"? Y/N\n >>> ')
+
+                    # Permission Handler
+                    # If yes... then it will delete the existing file to avoid interference and errors
+                    if Permission == "y":
+                        Clear_Terminal()
+                        if os.name == "posix":
+                            os.system(f'rm -rf "{Yiff_Path}"')
                         else:
-                            print(f'{Permission} Not Found, Please Try Again.\n\nExiting...')
-                            time.sleep(10)
-                            exit()
-                    for Loop in range(1, int(Default_Loop_Value)):
-                        File_Name = '{0:0>3}'.format(Loop) + '.jpg'
-                        Image_Handler = requests.get(url=Comic_Download_Link + '{0:0>3}'.format(Loop) + ".jpg", data=random.choice(User_Agent), proxies={f'{Site_Protocol}': f'{Site_Protocol}://{random.choice(Proxies)}'}, timeout=Timeout, stream=True)
-                        if Image_Handler.status_code == 503 or Image_Handler.status_code == 520:
-                            print("Finished Downloading ;)")
-                            time.sleep(10)
-                            exit()
-                        print(f'Downloading: {"{0:0>3}".format(Loop)}.jpg || Comic Name: {Comic_Name} || Scrapping At: {Comic_Download_Link + "{0:0>3}".format(Loop) + ".jpg"}')
-                        with open(File_Name, "wb") as Initial_Writer:
-                            Initial_Writer.write(Image_Handler.content)
-                            Yiff_Path_2 = os.path.dirname(os.path.abspath(__file__)) + "\\" + File_Name
-                            Initial_Writer.close()
-                        shutil.move(Yiff_Path_2, Yiff_Path)
+                            os.system(f'rmdir /q/s "{Yiff_Path}"')
+                        os.mkdir(os.path.join(Parent_Dir, Directory_Name))
+                        print("\nProceeding...\n")
+                        pass
+                    # If no... then it will just exit
+                    elif Permission == "n":
+                        print("Exiting...")
+                        time.sleep(10)
+                        exit()
+                    # Else choices is not found on the list... goto exit.
+                    else:
+                        print(f'{Permission} Not Found, Please Try Again.\n\nExiting...')
+                        time.sleep(10)
+                        exit()
+
+                # Main process/downloader
+                # Looping method for faster download (same concept from slurb on github)
+                for Loop in range(1, int(Default_Loop_Value)):
+                    File_Name = '{0:0>3}'.format(Loop) + '.' + File_Extension
+                    Image_Handler = requests.get(url=Comic_Download_Link + '{0:0>3}'.format(Loop) + '.' + File_Extension, data=random.choice(User_Agent), proxies={f'{Site_Protocol}': f'{Site_Protocol}://{random.choice(Proxies)}'}, timeout=Timeout, stream=True)
+
+                    # Checks the status code of the requests if it is valid... if not then stop
+                    if Image_Handler.status_code == 503 or Image_Handler.status_code == 520:
+                        print("Finished Downloading ;)")
+                        time.sleep(10)
+                        exit()
+
+                    # Prompts for user pleasure that their file are downloading.
+                    print(f'Downloading: {"{0:0>3}".format(Loop)}.{File_Extension} || Comic Name: {Comic_Name} || Scrapping At: {Comic_Download_Link + "{0:0>3}".format(Loop) + "." + File_Extension}')
+
+                    # Process the bytes received and makes it useful
+                    with open(File_Name, "wb") as Initial_Writer:
+                        Initial_Writer.write(Image_Handler.content)
+                        Yiff_Path_2 = os.path.dirname(os.path.abspath(__file__)) + Absolute_Path_Sign + File_Name
+                        Initial_Writer.close()
+
+                    # Moves the created file to its destination
+                    shutil.move(Yiff_Path_2, Yiff_Path)
             except (requests.RequestException, requests.ConnectTimeout, requests.ConnectionError):
-                print("\n\n\nYou Ate Probably Offline, Please Check Your Internet Connection First Then Re-Run This script\nStable Internet Is Required.")
+                print("\n\n\nYou Ate Probably Offline Or Your Input Is Invalid, Please Check Your Internet Connection First Then Re-Run This script\nStable Internet Is Required.")
                 time.sleep(10)
                 exit()
         Downloader()
@@ -166,26 +171,28 @@ def Main():
 if __name__ == "__main__":
     try:
         def Check_For_Required_Files_If_Exist():
+
             if os.path.isdir("Comic Folder"):
                 pass
             else:
                 os.mkdir("Comic Folder")
+
             if os.path.isfile(".Settings.yaml"):
                 pass
             else:
                 with open(".Settings.yaml", "w") as Writer:
                     Writer.write("""# Only modify what you know to avoid errors!!!
 
-
 Settings:
 
   Script_Override:
     Default_Loop_Value: 999   # Default value: "999"
+    File_Extension: jpg  # Default format: "jpg"
     Site_Protocol: http  # Default value: "http"
     Script_Password: ""  # Adding any value inside these quotations will be your password. Leave it empty if you don't want it.
 
   Website_Data:   # Required data for requests packages
-    Static_Yiff_Link: https://static.yiffer.xyz/comics/
+    Static_Yiff_Link: https://static.yiffer.xyz/comics/  # Changing this may cause error!!!
     Timeout: 5   # In seconds
 
   Website_Ping_Data:   # What website to check user's internet connection status
